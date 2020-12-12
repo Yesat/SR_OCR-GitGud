@@ -56,7 +56,7 @@ def pre_proc(img):
         peak_img[x]=transf
         results[x]=thresh
         cv2.imshow('transf',transf)
-        cv2.waitKey()
+        cv2.waitKey(3000)
     return [results,peak_img]
 
 def sr_ocr(imgs):
@@ -66,7 +66,7 @@ def sr_ocr(imgs):
         config = (
             "-l eng --oem 1 --psm {} -c tessedit_char_whitelist=0123456789".format(11))
         res = ptes.image_to_string(img, config=config)
-        print(res)
+        # print(res)
         res_clean = ''.join(e for e in res if e.isdigit())
         if res_clean == '':
             res_clean = 'NoSR'
@@ -91,17 +91,17 @@ def oq_check(img):
     
 def main():
     img = cv2.imread('Overwatch.png')
-    img2 = cv2.imread('Overwatch_oq.png')
+    img2 = cv2.imread('Overwatch_oq.jpeg')
     
     preproc, peak_img = pre_proc(img)
     
     # print(preproc.keys())
-    
+    results1 = sr_ocr(preproc)
     preproc, peak_img = pre_proc(img2)
 
     # print(preproc.keys())
     
-    results=sr_ocr(preproc)
+    results2=sr_ocr(preproc)
 
 
 if __name__ == '__main__':
