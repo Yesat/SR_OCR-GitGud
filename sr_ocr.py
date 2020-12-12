@@ -81,7 +81,7 @@ def oq_check(img):
     cut = img[origin[0]: origin[0]+size[0], origin[1]: origin[1]+size[1]]
     
     res = ptes.image_to_string(cut)
-    print(res)
+    # print(res)
     if re.match('OPEN QUEUE',res):
         print('foo')
         return True
@@ -90,11 +90,17 @@ def oq_check(img):
         return False
     
 def main():
-    img = cv2.imread('Overwatch_qdj1DDaBvo.png')
-
+    img = cv2.imread('Overwatch.png')
+    img2 = cv2.imread('Overwatch_oq.png')
+    
     preproc, peak_img = pre_proc(img)
     
-    print(preproc.keys())
+    # print(preproc.keys())
+    
+    preproc, peak_img = pre_proc(img2)
+
+    # print(preproc.keys())
+    
     results=sr_ocr(preproc)
 
 
