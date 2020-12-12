@@ -48,12 +48,12 @@ def pre_proc(img):
     for x in origin_peak:
         ori = origin_peak[x]
         cut = img[ori[1]:ori[1]+SIZE_PEAK[1], ori[0]:ori[0]+SIZE_PEAK[0]]
-        rez = resizeImage(cut, (2.1, 2.1))
+        rez = resizeImage(cut, (2.1, 2.1)) #Tesseract works better by rescaling the image. 
         bord = cv2.copyMakeBorder(
-            rez, 5, 1, 1, 1, cv2.BORDER_CONSTANT, value=[255, 255, 255])
-        transf = shearing(bord)
-        thresh = thresholding(transf)
-        peak_img[x]=transf
+            rez, 5, 1, 1, 1, cv2.BORDER_CONSTANT, value=[255, 255, 255]) # For safety before the shearing adding a small border prevent the text to be cut off
+        transf = shearing(bord) # Blizzard slanted font is not playing well with Tesseract, so a simple shearing help.
+        thresh = thresholding(transf) # Due to the resolution, thresholding gives better results
+        peak_img[x]=transf #for easy check
         results[x]=thresh
         cv2.imshow('transf',transf)
         cv2.waitKey(3000)
@@ -74,7 +74,7 @@ def sr_ocr(imgs):
         print(res_clean)
     return results   
 
-def oq_check(img):
+def oq_check(img): # As the Open Queue box doesn't appear if you don't play it, simple OCR check if the text is present in the highest SR Box
     origin = (460,540)
     size = (45,110)
     
@@ -90,6 +90,7 @@ def oq_check(img):
         return False
     
 def main():
+    #TODO: Automate the pass on images
     img = cv2.imread('Overwatch.png')
     img2 = cv2.imread('Overwatch_oq.jpeg')
     
