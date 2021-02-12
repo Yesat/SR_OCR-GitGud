@@ -1,7 +1,9 @@
+Batch
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,windows,jupyternotebooks,images
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,windows,jupyternotebooks,images
 
+prototyping_notebook.ipynb
 
 ### JupyterNotebooks ###
 # gitignore template for Jupyter Notebooks
@@ -181,3 +183,5 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/python,windows,jupyternotebooks,images
+
+*.png

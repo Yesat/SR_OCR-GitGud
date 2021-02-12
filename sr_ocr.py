@@ -3,13 +3,16 @@ import pytesseract as ptes
 import numpy as np
 from matplotlib import pyplot as plt
 import re
+import glob
+import random as rd
+import csv
+import os.path as path
 
 ptes.pytesseract.tesseract_cmd = r'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
 
 
 def thresholding(image):
     return cv2.threshold(image, 140, 255, cv2.THRESH_BINARY)[1]
-
 
 def shearing(img):
     shear = -2
@@ -56,7 +59,7 @@ def pre_proc(img):
         peak_img[x]=transf #for easy check
         results[x]=thresh
         cv2.imshow('transf',transf)
-        cv2.waitKey(3000)
+        cv2.waitKey(1)
     return [results,peak_img]
 
 def sr_ocr(imgs):
@@ -70,8 +73,14 @@ def sr_ocr(imgs):
         res_clean = ''.join(e for e in res if e.isdigit())
         if res_clean == '':
             res_clean = 'NoSR'
+        elif int(res_clean)<2000:
+            res_clean = 'Not readable'
+        elif int(res_clean)>5000:
+            res_clean = 'Not readable'
+        elif rd.uniform(0,10)<0:
+            res_clean = 'Check'
         results[r]=res_clean
-        print(res_clean)
+        # print(res_clean)
     return results   
 
 def oq_check(img): # As the Open Queue box doesn't appear if you don't play it, simple OCR check if the text is present in the highest SR Box
@@ -83,27 +92,68 @@ def oq_check(img): # As the Open Queue box doesn't appear if you don't play it, 
     res = ptes.image_to_string(cut)
     # print(res)
     if re.match('OPEN QUEUE',res):
-        print('foo')
+        # print('foo')
         return True
     else:
-        print('bar')
+        # print('bar')
         return False
-    
+
+def test_read(results):
+    return (all(value == 'NoSR' for value in results.values()) ^ all(
+        value == 'Not readable' for value in results.values()))
+
+def processing(fn):
+        img = cv2.imread(fn)
+        img_res = cv2.resize(img, (1920,1080)) #image are now resized
+        preproc, peak_img = pre_proc(img_res)
+        results = sr_ocr(preproc)
+        if test_read(results):
+            print (test_read(results))
+            results = {x: 'Not readable' for x in results}
+        fn = fn.replace('Batch\\', '')
+        results['fn'] = fn
+        # print(fn, results)
+        return(results,peak_img)
+        
+def print_csv(list_,file):
+    colunms = ['fn', 't', 'd', 's']
+    with open(file, 'w', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=colunms)
+        writer.writeheader()
+        for data in list_:
+            writer.writerow(data)
+
+def save_img(fn,img,path_):
+    fn = fn.replace('Batch\\','')
+    print(fn)
+    for x in img:
+        img_name = fn +'_'+ x +'.png'
+        img_path = path.join(path_,img_name)
+
+        status = cv2.imwrite(img_path,img[x])
+
+
 def main():
-    #TODO: Automate the pass on images
-    img = cv2.imread('Overwatch.png')
-    img2 = cv2.imread('Overwatch_oq.jpeg')
+    res_path = "Results"
+    res_im_path = path.join(res_path,'img')
+    res_file = path.join(res_path,'result.csv')
+    list_res = []
+    for fn in glob.glob('Batch\*.png'):
+        data, img = processing(fn)
+        list_res.append(data)
+        save_img(fn, img, res_im_path)
+    for fn in glob.glob('Batch\*.jpeg'):
+        data, img = processing(fn)
+        list_res.append(data)
+        save_img(fn, img, res_im_path)
+    for fn in glob.glob('Batch\*.jpg'):
+        data, img = processing(fn)
+        list_res.append(data)
+        save_img(fn, img, res_im_path)
     
-    preproc, peak_img = pre_proc(img)
-    
-    # print(preproc.keys())
-    results1 = sr_ocr(preproc)
-    preproc, peak_img = pre_proc(img2)
-
-    # print(preproc.keys())
-    
-    results2=sr_ocr(preproc)
-
+        
+    print_csv(list_res,res_file)
+    print('done')
 
 if __name__ == '__main__':
     	main()
