@@ -8,6 +8,7 @@ import random as rd
 import csv
 import os.path as path
 
+#needs the location of Tesseract installation (per instruction)
 ptes.pytesseract.tesseract_cmd = r'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
 
 
